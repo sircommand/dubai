@@ -26,14 +26,26 @@ export default function CategoryList({
   onBack,
 }: CategoryListProps) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const filtered = categories.filter((cat) =>
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this category?')) return
+
+    setDeletingId(id)
+    try {
+      await onDelete(id)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <div className="card rounded-2xl overflow-hidden">
-      <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+      <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <span className="material-icons-outlined text-primary">list_alt</span>
           All Categories
@@ -94,7 +106,7 @@ export default function CategoryList({
                   className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                 >
                   <td className="px-6 py-4">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
                       {category.icon.startsWith('data:') ? (
                         <img
                           src={category.icon}
@@ -102,18 +114,22 @@ export default function CategoryList({
                           className="w-6 h-6 object-contain"
                         />
                       ) : (
-                        <span className="material-icons-outlined text-primary">{category.icon}</span>
+                        <span className="material-icons-outlined text-primary text-lg">
+                          category
+                        </span>
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="font-medium text-slate-900 dark:text-white">{category.name}</div>
+                    <div className="font-medium text-slate-900 dark:text-white">
+                      {category.name}
+                    </div>
                     <div className="text-xs text-slate-500">
                       {category.parentId ? 'Sub-category' : 'Root Category'}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {category.subCategoryCount > 0 && (
+                    {category.subCategoryCount > 0 ? (
                       <button
                         onClick={() => onViewSubcategories(category._id)}
                         className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors group"
@@ -123,18 +139,19 @@ export default function CategoryList({
                           chevron_right
                         </span>
                       </button>
+                    ) : (
+                      <span className="text-slate-400 text-sm">No subcategories</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => onDelete(category._id)}
-                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                        title="Delete"
-                      >
-                        <span className="material-icons-outlined text-sm">delete</span>
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleDelete(category._id)}
+                      disabled={deletingId === category._id}
+                      className="p-2 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                      title="Delete"
+                    >
+                      <span className="material-icons-outlined">delete</span>
+                    </button>
                   </td>
                 </tr>
               ))}

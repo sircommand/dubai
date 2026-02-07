@@ -23,6 +23,10 @@ export default function CategoryForm({ onSubmit, parentId, categories }: Categor
         toast.error('Only SVG and PNG files are allowed')
         return
       }
+      if (file.size > 1024 * 1024) {
+        toast.error('File size must be less than 1MB')
+        return
+      }
       setIconFile(file)
     }
   }
@@ -112,10 +116,10 @@ export default function CategoryForm({ onSubmit, parentId, categories }: Categor
               disabled={isLoading}
             />
             <div className="space-y-1 text-center">
-              <span className="material-icons-outlined text-slate-400 group-hover:text-primary transition-colors text-3xl">
+              <span className="material-icons-outlined text-slate-400 group-hover:text-primary transition-colors text-3xl block">
                 upload_file
               </span>
-              <div className="flex text-sm text-slate-600 dark:text-slate-400">
+              <div className="flex text-sm text-slate-600 dark:text-slate-400 justify-center">
                 <p className="font-medium text-primary">Upload a file</p>
                 <p className="pl-1">or drag and drop</p>
               </div>
